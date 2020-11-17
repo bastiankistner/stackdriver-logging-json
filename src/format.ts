@@ -1,7 +1,7 @@
 import { convertClientMetadataToStdMetadata, convertDurationToString } from './utils';
-import type { createLoggingClientEntry, createStandardEntry } from './create';
+import type { createEntry } from './create';
 
-export function loggingClientEntryToStandardEntry(entry: ReturnType<typeof createLoggingClientEntry>) {
+export function loggingClientEntryToStandardEntry(entry: ReturnType<typeof createEntry>) {
 	const { metadata, data } = entry;
 
 	return {
@@ -12,8 +12,8 @@ export function loggingClientEntryToStandardEntry(entry: ReturnType<typeof creat
 	};
 }
 
-export function standardEntryToFluentBit130Entry(entry: ReturnType<typeof createStandardEntry>) {
-	const { ...modifiedEntry } = entry;
+export function loggingClientEntryToFluentBit130Entry(entry: ReturnType<typeof createEntry>) {
+	const { ...modifiedEntry } = loggingClientEntryToStandardEntry(entry);
 
 	// delete the following fields from log entry as fluent bit doesn't cover them / uses its own values
 	delete modifiedEntry.logName;

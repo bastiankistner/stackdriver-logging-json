@@ -1,2 +1,2 @@
-export { createLoggingClientEntry, createStandardEntry } from './create';
+export { createEntry } from './create';
 export * as format from './format';

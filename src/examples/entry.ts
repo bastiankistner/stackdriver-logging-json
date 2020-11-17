@@ -1,17 +1,17 @@
-import { createLoggingClientEntry, createStandardEntry } from '../create';
+import { createEntry } from '../create';
 
 export function createSampleEntry() {
-	const defaultMetadata: Parameters<typeof createLoggingClientEntry>[0] = {
+	const defaultMetadata: Parameters<typeof createEntry>[0] = {
 		projectId: 'ehrl-main',
 		labels: { type: 'test' },
 	};
 
-	const payload: Parameters<typeof createLoggingClientEntry>[1] = {
+	const payload: Parameters<typeof createEntry>[1] = {
 		message: new Error('this is an error message'), // 'this is my message',
 		serviceContext: { service: 'my-service', version: '1.0.0' },
 	};
 
-	const entryMetadata: Parameters<typeof createStandardEntry>[2] = {
+	const entryMetadata: Parameters<typeof createEntry>[2] = {
 		severity: 'ERROR',
 		labels: {
 			additional: 'label',
@@ -54,14 +54,7 @@ export function createSampleEntry() {
 		},
 	};
 
-	const clientEntry = createLoggingClientEntry(defaultMetadata, payload, entryMetadata);
-	const stdEntry = createStandardEntry(defaultMetadata, payload, {
-		...entryMetadata,
-		logName: entryMetadata.logName,
-	});
+	const entry = createEntry(defaultMetadata, payload, entryMetadata);
 
-	return {
-		clientEntry,
-		stdEntry,
-	};
+	return entry;
 }
