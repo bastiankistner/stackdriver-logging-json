@@ -5,24 +5,35 @@ import { auth } from 'google-auth-library';
 import { Logger } from 'tslog';
 import { SEVERITY_KEY } from 'types/entry.common';
 
-function pullFirst<T>(args: any[], predicate: (value: any, index: number, obj: any[]) => boolean) {
-	const index = args.findIndex(predicate);
+function pullFirst<T>(current: { args: any[] }, predicate: (value: any, index: number, obj: any[]) => boolean) {
+	const index = current.args.findIndex(predicate);
 
 	if (index === -1) {
-		return [undefined, args];
+		return undefined;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-	return [args[index] as T, [...args.slice(0, index), ...args.slice(index + 1)]];
+	const match = current.args[index];
+	current.args = [...current.args.slice(0, index), ...current.args.slice(index + 1)];
+
+	return match as T;
 }
 
 export function createEntry(severity: SEVERITY_KEY, ...args: any[]) {
 	// analyse args
 
+	// assign args to an object so that we can mutate it easily
+
+	const current = { args };
+
 	// 1. find the first error object if available
 
-	const [error, args] = pullFirst<Error>(args, (v) => v instanceof Error);
+	const error = pullFirst<Error>(current, (v) => v instanceof Error);
 
+	if (error) {
+		//
+	}
+
+	//
 	return {};
 }
 
