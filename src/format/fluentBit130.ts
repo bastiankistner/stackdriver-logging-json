@@ -1,19 +1,9 @@
-import { convertClientMetadataToStdMetadata, convertDurationToString } from './utils';
-import type { createEntry } from './create';
+import { convertDurationToString } from 'utils';
+import type { createEntry } from '../create';
+import { entryToStd } from './std';
 
-export function loggingClientEntryToStandardEntry(entry: ReturnType<typeof createEntry>) {
-	const { metadata, data } = entry;
-
-	return {
-		// spread payload on root
-		...data,
-		// add metadata
-		...convertClientMetadataToStdMetadata(metadata),
-	};
-}
-
-export function loggingClientEntryToFluentBit130Entry(entry: ReturnType<typeof createEntry>) {
-	const { ...modifiedEntry } = loggingClientEntryToStandardEntry(entry);
+export function entryToFluentBit130(entry: ReturnType<typeof createEntry>) {
+	const { ...modifiedEntry } = entryToStd(entry);
 
 	// delete the following fields from log entry as fluent bit doesn't cover them / uses its own values
 	delete modifiedEntry.logName;

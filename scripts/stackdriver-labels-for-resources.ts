@@ -43,7 +43,7 @@ async function run() {
   } as const;
   `;
 
-	const resourceFilePath = path.resolve(__dirname, '../stackdriver/__generated__', 'resources.ts');
+	const resourceFilePath = path.resolve(__dirname, '../src/__generated__', 'resources.ts');
 
 	fs.ensureFileSync(resourceFilePath);
 

@@ -1,7 +1,7 @@
 import { Entry, Logging } from '@google-cloud/logging';
 import fetch from 'node-fetch';
 import { createSampleEntry } from './entry';
-import { loggingClientEntryToFluentBit130Entry } from '../format';
+import { entryToFluentBit130 } from '../format';
 
 const entry = createSampleEntry();
 
@@ -27,7 +27,7 @@ async function writeToFluentBit() {
 
 	const url = useLocalhost ? 'http://localhost:8080/test' : 'https://graphql.sanalytics.io/test';
 
-	const body = loggingClientEntryToFluentBit130Entry(entry);
+	const body = entryToFluentBit130(entry);
 
 	const response = await fetch(url, {
 		method: 'POST',
