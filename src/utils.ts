@@ -1,11 +1,11 @@
 import { auth } from 'google-auth-library';
 import { CLIENT_KEYS_TO_SPECIAL_STD_KEYS, PATTERN_PROJECT_ID, PATTERN_TRACE_ID } from './constants';
-import { ClientEntrySpecialMetadata } from './types/entry.client';
+import type { ClientEntrySpecialMetadata } from './types/entry.client';
 import { StdEntrySpecialMetadata } from './types/entry.std';
 import { ClientHttpRequest, Duration } from './types/shared';
 
 export async function getProjectId() {
-	return (await auth.getProjectId()) as string;
+	return await auth.getProjectId();
 }
 
 /**
@@ -16,6 +16,7 @@ export async function getProjectId() {
 export function convertClientMetadataToStdMetadata<T extends ClientEntrySpecialMetadata>(
 	metadata: T
 ): Omit<T, keyof ClientEntrySpecialMetadata> & StdEntrySpecialMetadata {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const resultingMetadata: any = { ...metadata };
 
 	// set special field keys and remove client keys
@@ -26,7 +27,7 @@ export function convertClientMetadataToStdMetadata<T extends ClientEntrySpecialM
 		delete resultingMetadata[clientKey];
 	});
 
-	return resultingMetadata;
+	return resultingMetadata as Omit<T, keyof ClientEntrySpecialMetadata> & StdEntrySpecialMetadata;
 }
 
 // TODO: check if this results in sourcemap, if not, use new nodejs api if available
