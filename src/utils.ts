@@ -1,12 +1,7 @@
-import { auth } from 'google-auth-library';
 import { CLIENT_KEYS_TO_SPECIAL_STD_KEYS, PATTERN_PROJECT_ID, PATTERN_TRACE_ID } from './constants';
 import type { ClientEntrySpecialMetadata } from './types/entry.client';
 import { StdEntrySpecialMetadata } from './types/entry.std';
 import { ClientHttpRequest, Duration } from './types/shared';
-
-export async function getProjectId() {
-	return await auth.getProjectId();
-}
 
 /**
  * Converts Stackdriver special fields into their corresponding
