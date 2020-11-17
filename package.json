@@ -1,0 +1,42 @@
+{
+	"name": "stackdriver-logging-json",
+	"version": "1.0.0",
+	"description": "Plain JSON entries for Stackdriver Logging to be used with Google's logging client or standard streams (e.g. winston, tslog, bunyan, pino). Examples, additional utils and a formatter for GCP managed k8s fluent-bit included.",
+	"main": "lib/index.js",
+	"repository": "git@github.com:passionkind/stackdriver-logging-json.git",
+	"author": "Bastian Kistner <bastian.kistner@gmail.com>",
+	"license": "GPL-3.0-or-later",
+	"private": false,
+	"scripts": {
+		"build": "rimraf lib; tsc -p tsconfig.build.json",
+		"dev": "rimraf lib; tsc -p tsconfig.build.json -w",
+		"generate": "yarn ts-node src/scripts/stackdriver-labels-for-resources.ts"
+	},
+	"devDependencies": {
+		"@tsconfig/node14": "1.0.0",
+		"@types/fs-extra": "9.0.4",
+		"@types/jest": "26.0.15",
+		"@types/jsdom": "16.2.5",
+		"@types/node-fetch": "2.5.7",
+		"@typescript-eslint/eslint-plugin": "4.8.1",
+		"@typescript-eslint/parser": "4.8.1",
+		"eslint": "7.13.0",
+		"eslint-config-prettier": "6.15.0",
+		"fs-extra": "9.0.1",
+		"jest": "26.6.3",
+		"jsdom": "16.4.0",
+		"node-fetch": "2.6.1",
+		"prettier": "2.1.2",
+		"rimraf": "3.0.2",
+		"ts-node": "9.0.0",
+		"typescript": "4.0.5",
+		"utility-types": "3.10.0"
+	},
+	"peerDependencies": {
+		"@google-cloud/logging": "8.1.1",
+		"google-auth-library": "6.1.3"
+	},
+	"dependencies": {
+		"eventid": "1.0.0"
+	}
+}

@@ -1,0 +1,72 @@
+/* eslint-disable no-param-reassign */
+import { Entry, Logging } from '@google-cloud/logging';
+import { ApiResponse } from '@google-cloud/logging/build/src/log';
+import { auth } from 'google-auth-library';
+import { SEVERITY } from './constants';
+
+/**
+ *
+ */
+type Options = {
+	projectId?: string;
+	defaultSeverity: typeof SEVERITY[keyof typeof SEVERITY];
+	write?: 'client' | 'std';
+};
+
+type LogFunction = (data: any) => Promise<ApiResponse>;
+
+type Log = {
+	debug: LogFunction;
+	info: LogFunction;
+	notice: LogFunction;
+	warning: LogFunction;
+	error: LogFunction;
+	critical: LogFunction;
+	alert: LogFunction;
+	emergency: LogFunction;
+};
+
+const defaultOptions: Options = {
+	defaultSeverity: SEVERITY.INFO,
+};
+
+export function createEntry(severity: typeof SEVERITY[keyof typeof SEVERITY], data: {}) {
+	return new Entry({ severity }, data);
+}
+
+/**
+ * Authentication:
+ * If a service account is running on the machine or if there is a valid
+ * `GOOGLE_APPLICATION_CREDENTIALS` in `process.env`, you don't need to pass credentials.
+ * Otherwise, pass `GOOGLE_APPLICATION_CREDENTIALS` manually.
+ *
+ * If authentication can be determined automatically, you don't need to set
+ * - project_id
+ *
+ * - logName in stackdriver will be `projects/{project_id}/logs/{log_name}`
+ *
+ *
+ * @param options
+ */
+export async function createClientLogger(logName: string = 'client_log', options: Options): Promise<Log> {
+	options = Object.assign(options, defaultOptions);
+
+	if (!options.projectId) {
+		try {
+			options.projectId = await auth.getProjectId();
+		} catch (err) {
+			throw new Error('No projectId provided and unable to determine projectId from credentials or service account.');
+		}
+	}
+
+	const stackdriverClientLog = new Logging().log(logName, {});
+
+	const log: Log = {
+		alert: (data: any) => stackdriverClientLog.write(createEntry(SEVERITY.ALERT, data)),
+	};
+
+	console.log({ options });
+
+	return log;
+	//
+}

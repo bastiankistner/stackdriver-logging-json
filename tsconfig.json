@@ -1,0 +1,15 @@
+{
+  "extends": "@tsconfig/node14/tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "strictNullChecks": true,
+    "noEmit": true,
+    "declaration": true,
+    "sourceMap": true,
+    "baseUrl": "./src"
+  },
+  "include": [
+    "./src/**/*"
+  ],
+  "exclude": ["./*.js", "scripts"]
+}
