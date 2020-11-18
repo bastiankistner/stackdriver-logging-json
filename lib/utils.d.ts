@@ -1,7 +1,6 @@
 import type { ClientEntrySpecialMetadata } from './types/entry.client';
 import { StdEntrySpecialMetadata } from './types/entry.std';
 import { ClientHttpRequest, Duration } from './types/shared';
-export declare function getProjectId(): Promise<string>;
 /**
  * Converts Stackdriver special fields into their corresponding
  * named keys that can be picked up by fluentd or fluent-bit

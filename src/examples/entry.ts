@@ -1,13 +1,13 @@
 import { createEntry } from '../create';
 
-export function createSampleEntry() {
+export function createSampleEntry(message: string | Error, spanId?: string, traceId?: string) {
 	const defaultMetadata: Parameters<typeof createEntry>[0] = {
 		projectId: 'ehrl-main',
 		labels: { type: 'test' },
 	};
 
 	const payload: Parameters<typeof createEntry>[1] = {
-		message: new Error('this is an error message'), // 'this is my message',
+		message, // 'this is my message',
 		serviceContext: { service: 'my-service', version: '1.0.0' },
 	};
 
@@ -28,9 +28,9 @@ export function createSampleEntry() {
 			line: 44,
 			function: 'my-function',
 		},
-		spanId: '22222',
+		spanId,
 		timestamp: new Date(),
-		trace: '33333',
+		trace: traceId,
 		traceSampled: true,
 		httpRequest: {
 			cacheHit: true,
