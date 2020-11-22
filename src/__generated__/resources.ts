@@ -196,7 +196,7 @@ export type ResourceMap = {
 	vpn_tunnel: { project_id: string; tunnel_id: string; tunnel_name: string; location: string };
 };
 
-export const LABELS_FOR_RESOURCE: Record<keyof Resource, readonly string[]> = {
+export const LABELS_FOR_RESOURCE: Record<keyof ResourceMap, readonly string[]> = {
 	'aiplatform.googleapis.com/Endpoint': ['resource_container', 'location', 'endpoint_id'] as const,
 	api: ['project_id', 'service', 'method', 'version', 'location'] as const,
 	'apigee.googleapis.com/Environment': ['resource_container', 'org', 'env', 'location'] as const,

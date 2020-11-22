@@ -52,7 +52,7 @@ async function run() {
 		${RESOURCE_TYPES}
 	};
 
-	export const LABELS_FOR_RESOURCE: Record<keyof Resource, readonly string[]> = {
+	export const LABELS_FOR_RESOURCE: Record<keyof ResourceMap, readonly string[]> = {
   ${LABELS_ARRAY}  
 	} as const;
   `;
