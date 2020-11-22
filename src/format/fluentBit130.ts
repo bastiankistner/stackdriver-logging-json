@@ -1,4 +1,4 @@
-import { convertDurationToString } from 'utils';
+import { convertDurationToString } from '../utils';
 import type { createEntry } from '../create';
 import { entryToStd } from './std';
 

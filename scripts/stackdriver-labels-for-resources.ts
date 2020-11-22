@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import fetch from 'node-fetch';
 import { JSDOM } from 'jsdom';
 import * as fs from 'fs-extra';
@@ -22,7 +21,8 @@ async function run() {
 	const labelsForResource = apiRows.map((row) => {
 		const [resourceColumn, labelsColumn] = Array.from(row.querySelectorAll('td'));
 
-		const resource = resourceColumn.querySelector('code').textContent;
+		const resource = resourceColumn.querySelector('code')?.textContent;
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 		const labels = Array.from(labelsColumn.querySelectorAll('code')).map((label) => (label as any).textContent);
 
 		return {
@@ -31,16 +31,30 @@ async function run() {
 		};
 	});
 
-	const CONTENT = labelsForResource
+	// labelsForResource.unshift({ resource: 'auto', labels: [] });
+
+	const LABELS_ARRAY = labelsForResource
 		.map(({ resource, labels }) => {
+			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
 			return `'${resource}': ${createLabels(labels)} as const`;
 		})
 		.join(',\n');
 
-	const result = `
-  export const LABELS_FOR_RESOURCES = {
-  ${CONTENT}  
-  } as const;
+	const RESOURCE_TYPES = labelsForResource.reduce((previousResource, current) => {
+		const labels = current.labels.map((label) => `${label as string}: string;`);
+		return `${previousResource}'${current.resource as string}': ${
+			labels.length === 0 ? 'undefined;' : `{${labels.join('\n')}};`
+		}`;
+	}, '');
+
+	const result = `	
+	export type ResourceMap = {
+		${RESOURCE_TYPES}
+	};
+
+	export const LABELS_FOR_RESOURCE: Record<keyof Resource, readonly string[]> = {
+  ${LABELS_ARRAY}  
+	} as const;
   `;
 
 	const resourceFilePath = path.resolve(__dirname, '../src/__generated__', 'resources.ts');
@@ -58,4 +72,6 @@ async function run() {
 	);
 }
 
-run();
+void run();
+
+console.log('HELLO');

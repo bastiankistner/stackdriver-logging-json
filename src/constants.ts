@@ -32,7 +32,7 @@ export const CLIENT_KEYS_TO_SPECIAL_STD_KEYS = {
 	operation: 'logging.googleapis.com/operation',
 } as const;
 
-export const GLOBAL_RESOURCE_TYPE = 'global' as const;
+export const DEFAULT_RESOURCE_TYPE = 'auto' as const;
 
 // trace id must be 32 characters hexadecimal string
 export const PATTERN_TRACE_ID = /^[0-9a-fA-F]{32,32}$/;

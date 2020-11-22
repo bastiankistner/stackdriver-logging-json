@@ -1,17 +1,13 @@
 {
-  "extends": "@tsconfig/node14/tsconfig.json",
-  "compilerOptions": {
-    "rootDir": "src",
-    "strictNullChecks": true,
-    "noEmit": true,
-    "declaration": true,
-    "sourceMap": true,
-    "baseUrl": "./src",
-    "typeRoots": ["node_modules/@types", "./@types"]
-  },
-  "include": [
-    "./src/**/*",
-    "./@types/**/*",
-  ],
-  "exclude": ["./*.js", "scripts"]
+	"extends": "@tsconfig/node14/tsconfig.json",
+	"compilerOptions": {
+		"rootDir": "src",
+		"strictNullChecks": true,
+		"noEmit": true,
+		"declaration": true,
+		"sourceMap": true,
+		"baseUrl": "./src",
+		"lib": ["ES2020", "DOM"],
+		"typeRoots": ["node_modules/@types", "./@types"]
+	}
 }

@@ -1,16 +1,14 @@
-import { GLOBAL_RESOURCE_TYPE } from '../constants';
-import { LABELS_FOR_RESOURCES } from '../__generated__/resources';
+import { DEFAULT_RESOURCE_TYPE } from '../constants';
+import { LABELS_FOR_RESOURCE, ResourceMap } from '../__generated__/resources';
 
-export type DefaultResourceKey = typeof GLOBAL_RESOURCE_TYPE;
+export type DefaultResourceKey = typeof DEFAULT_RESOURCE_TYPE;
 
-export type ResourceTypeKeys = keyof typeof LABELS_FOR_RESOURCES;
+export type ResourceTypeKeys = keyof ResourceMap;
 
-export type ServiceContext =
-	| undefined
-	| {
-			service: string;
-			version?: string;
-	  };
+export type ServiceContext = {
+	service: string;
+	version?: string;
+};
 
 // aka `data` when we send it through the client
 export type JsonPayload = {
@@ -23,21 +21,17 @@ export type JsonPayload = {
 	 * saved to Error Reporting.
 	 * ✅
 	 * */
-	message: string | Error;
+	message?: string | Error;
 	serviceContext?: ServiceContext;
 } & Record<string, unknown>;
 
-export type ResourceType<R extends ResourceTypeKeys> = {
+export type Resource<R extends ResourceTypeKeys> = {
 	// we mark this optional as we'll reset it by default when R is specified during entry creation
-	type?: R;
-	labels?: Record<typeof LABELS_FOR_RESOURCES[R][number], string>;
+	type: R;
+	labels: ResourceMap[R];
 };
 
 export type DefaultMetadata = {
-	/**
-	 * we always need the project id to create proper lognames and traces
-	 */
-	projectId: string;
 	// ✅
 	/**
 	 * Stringified to `logging.googleapis.com/labels`
@@ -45,9 +39,13 @@ export type DefaultMetadata = {
 	labels?: Record<string, string>;
 };
 
-export type DefaultMetadataWithOptionalResource<Resource extends ResourceTypeKeys> = {
-	resource?: ResourceType<Resource>;
-} & DefaultMetadata;
+export type DefaultMetadataWithOptionalResource<
+	R extends ResourceTypeKeys = DefaultResourceKey
+> = R extends DefaultResourceKey
+	? DefaultMetadata
+	: DefaultMetadata & {
+			resource: Resource<R>;
+	  };
 
 export type HttpRequest = {
 	requestMethod?: string;

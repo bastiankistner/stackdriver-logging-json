@@ -1,26 +1,60 @@
 /* eslint-disable prefer-const */
 import { EventId } from 'eventid';
 import { ClientEntryMetadata } from './types/entry.client';
-import { DefaultMetadataWithOptionalResource, JsonPayload, ResourceTypeKeys, DefaultResourceKey } from './types/shared';
+import {
+	DefaultMetadataWithOptionalResource,
+	JsonPayload,
+	ResourceTypeKeys,
+	DefaultResourceKey,
+	DefaultMetadata,
+	Resource,
+} from './types/shared';
 import { formatMessage, createFullyQualifiedIdentifier, mergeLabels, formatClientHttpRequest } from './utils';
-import { GLOBAL_RESOURCE_TYPE } from './constants';
-import { LABELS_FOR_RESOURCES } from './__generated__/resources';
+import { DEFAULT_RESOURCE_TYPE } from './constants';
+import { LABELS } from './__generated__/resources';
+import type { DeepRequired } from 'utility-types';
 
 const eventId = new EventId();
 
+//
+//
+//
+// TODO: SIMPLIFY WITH HELPERS
+
+// - [ ] create a single interface that takes ALL params but as a nice object as below
+// - [ ] create helpers for `createPayload`, `createService`, `createRequest`, `createResource` ... ?
+// - [ ] maybe return those helpers / use a simple state that will then be passed to those helpers as first argument (similar to hooks) that can then be returned
+// - [ ] that function will then also be able to dynamically type that state object
+// - [ ] similar to createContext ? 
+// - [ ] type the params in this function so that we always know what we'll get back
+// - [ ] is resource the only dynamic type
+// - [ ] don't do all the modified stuff
+
+//
+//
+//
+
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function createEntry<R extends ResourceTypeKeys = DefaultResourceKey>(
-	defaultMetadata: DefaultMetadataWithOptionalResource<R>,
-	payload: JsonPayload,
-	entryMetadata: ClientEntryMetadata
-) {
-	const { projectId, labels: defaultLabels, ...modifiedDefaultMetadata } = defaultMetadata;
-	let { message, serviceContext } = payload;
-	let { logName, trace, labels: entryLabels, httpRequest, ...modifiedEntryMetadata } = entryMetadata;
+export function createEntry<
+	R extends ResourceTypeKeys,
+	P extends JsonPayload,
+	M = DefaultMetadataWithOptionalResource<R> & ClientEntryMetadata
+>(options: {
+	projectId: string;
+	resource?: DefaultResourceKey | Resource<R>;
+	metadata: M;
+	payload: P;
+}): {
+	// metadata: R extends DefaultResourceKey ? Omit<Metadata<R>, 'resource'> : Metadata<R>;
+	metadata: DefaultMetadataWithOptionalResource<R>; // & {labels: typeof M['labels'] & typeof entryMetadata['labels']};
+	data: P;
+} {
+	const { labels, logName, trace, httpRequest, ...modifiedMetadata } = options.metadata;
+
+	let { message, serviceContext } = options.payload;
 
 	// merge labels:
-
-	const labels = mergeLabels(defaultLabels, entryLabels);
 
 	// set defaults
 
@@ -32,29 +66,35 @@ export function createEntry<R extends ResourceTypeKeys = DefaultResourceKey>(
 		modifiedEntryMetadata.insertId = eventId.new();
 	}
 
-	// set resource.type to 'global' if unset
-	if (
-		typeof modifiedDefaultMetadata.resource === 'undefined' ||
-		typeof modifiedDefaultMetadata.resource.type === 'undefined'
-	) {
-		modifiedDefaultMetadata.resource = { ...modifiedDefaultMetadata.resource, type: GLOBAL_RESOURCE_TYPE as R };
+	// delete resource if type is auto
+	if (modifiedMetadata.resource?.type === DEFAULT_RESOURCE_TYPE) {
+		delete modifiedMetadata.resource;
+		// modifiedDefaultMetadata.resource = { ...modifiedDefaultMetadata.resource, type: DEFAULT_RESOURCE_TYPE as R };
 	}
 
-	if (modifiedDefaultMetadata.resource.type) {
-		const resourceLabels = LABELS_FOR_RESOURCES[modifiedDefaultMetadata.resource.type];
+	if (modifiedMetadata.resource?.type && modifiedMetadata.resource.type in LABELS_FOR_RESOURCES) {
+		const resourceLabels = LABELS_FOR_RESOURCES[modifiedMetadata.resource.type];
 
 		// add projectId as resource.labels['project_id'] if it can be set
 		if (Array.isArray(resourceLabels) && resourceLabels.includes('project_id')) {
-			modifiedDefaultMetadata.resource.labels = {
-				...modifiedDefaultMetadata.resource.labels,
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
+			// @ts-ignore
+			modifiedMetadata.resource.labels = {
+				...modifiedMetadata.resource.labels,
 				project_id: projectId,
 			};
 		}
 	}
 
-	message = formatMessage(message);
+	const potentiallyUndefinedData: JsonPayload = {};
+
+	if (message) {
+		message = formatMessage(message);
+		potentiallyUndefinedData.message = message;
+	}
+
+	if (serviceContext) {
+		potentiallyUndefinedData.serviceContext = serviceContext;
+	}
 
 	// formatted logName also works with the logging client
 	if (logName) {
@@ -89,14 +129,20 @@ export function createEntry<R extends ResourceTypeKeys = DefaultResourceKey>(
 
 	return {
 		metadata: {
-			...modifiedDefaultMetadata,
+			...modifiedMetadata,
 			...modifiedEntryMetadata,
 			...potentiallyUndefinedMetadata,
 			logName,
 		},
-		data: {
-			message,
-			serviceContext,
-		},
+		data: potentiallyUndefinedData,
 	};
 }
+
+const entry = createEntry({
+	metadata: {},
+	payload: { message: 'sdfsdf', serviceContext: { service: '', version: '' } },
+	projectId: 'my-project',
+	resource: { type: 'api', labels: { location: '', method: '', project_id: '', service: '', version: '' } },
+});
+
+entry.data.

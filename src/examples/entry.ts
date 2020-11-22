@@ -1,6 +1,6 @@
 import { createEntry } from '../create';
 
-export function createSampleEntry(message: string | Error, spanId?: string, traceId?: string) {
+export function createSampleEntry(message?: string | Error, spanId?: string, traceId?: string) {
 	const defaultMetadata: Parameters<typeof createEntry>[0] = {
 		projectId: 'ehrl-main',
 		labels: { type: 'test' },
@@ -54,7 +54,14 @@ export function createSampleEntry(message: string | Error, spanId?: string, trac
 		},
 	};
 
-	const entry = createEntry(defaultMetadata, payload, entryMetadata);
+	const entry = createEntry(
+		{
+			projectId: 'ehrl-main',
+			labels: { type: 'test' },
+		},
+		payload,
+		entryMetadata
+	);
 
 	return entry;
 }

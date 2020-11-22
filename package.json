@@ -10,7 +10,7 @@
 	"scripts": {
 		"build": "rimraf lib; tsc -p tsconfig.build.json",
 		"dev": "rimraf lib; tsc -p tsconfig.build.json -w",
-		"generate": "yarn ts-node src/scripts/stackdriver-labels-for-resources.ts"
+		"generate": "yarn ts-node -P tsconfig.scripts.json ./scripts/stackdriver-labels-for-resources.ts"
 	},
 	"devDependencies": {
 		"@google-cloud/logging": "8.1.1",
