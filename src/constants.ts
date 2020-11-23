@@ -1,3 +1,5 @@
+import { LABELS_FOR_RESOURCE } from '__generated__/resources';
+
 export const SEVERITY = {
 	DEFAULT: 'DEFAULT',
 	DEBUG: 'DEBUG',
@@ -33,6 +35,8 @@ export const CLIENT_KEYS_TO_SPECIAL_STD_KEYS = {
 } as const;
 
 export const DEFAULT_RESOURCE_TYPE = 'auto' as const;
+
+export const RESOURCE_TYPES = Object.keys(LABELS_FOR_RESOURCE);
 
 // trace id must be 32 characters hexadecimal string
 export const PATTERN_TRACE_ID = /^[0-9a-fA-F]{32,32}$/;

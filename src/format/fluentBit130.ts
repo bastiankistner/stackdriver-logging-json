@@ -1,27 +1,36 @@
 import { convertDurationToString } from '../utils';
-import type { createEntry } from '../create';
 import { entryToStd } from './std';
+import { DataOutput, MetadataOutput } from 'types/output';
+import { MetadataOutputStdFluentBit13 } from 'types/output.std';
 
-export function entryToFluentBit130(entry: ReturnType<typeof createEntry>) {
-	const { ...modifiedEntry } = entryToStd(entry);
+export function entryToFluentBit130<M extends MetadataOutput = MetadataOutput, D extends DataOutput = DataOutput>({
+	metadata,
+	data,
+}: {
+	metadata: M;
+	data: D;
+}): MetadataOutputStdFluentBit13<M> & D {
+	delete metadata.traceSampled;
+	delete metadata.logName;
+
+	const { timestamp, httpRequest } = entry.metadata;
+
+	if ('resource' in entry.metadata) {
+		delete entry.metadata.resource;
+	}
+
+	const { ...modifiedEntry } = entryToStd<M, D>({ metadata, data });
 
 	// delete the following fields from log entry as fluent bit doesn't cover them / uses its own values
-	delete modifiedEntry.logName;
-	delete modifiedEntry['logging.googleapis.com/trace_sampled'];
-	delete modifiedEntry.resource;
-
-	const { timestamp, httpRequest: clientHttpRequest, ...rest } = modifiedEntry;
 
 	// convert latency (duration) to string
-	const potentiallyUndefinedMetadata: { httpRequest?: typeof clientHttpRequest & { latency?: string } } = {};
+	const potentiallyUndefinedMetadata: { httpRequest?: typeof httpRequest & { latency?: string } } = {};
 
-	if (typeof clientHttpRequest !== 'undefined') {
-		const { latency, ...httpRequest } = clientHttpRequest;
-
+	if (typeof httpRequest !== 'undefined') {
 		potentiallyUndefinedMetadata.httpRequest = httpRequest;
 
-		if (typeof latency !== 'undefined') {
-			potentiallyUndefinedMetadata.httpRequest.latency = convertDurationToString(clientHttpRequest.latency);
+		if (typeof httpRequest.latency !== 'undefined') {
+			potentiallyUndefinedMetadata.httpRequest.latency = convertDurationToString(httpRequest.latency);
 		}
 	}
 

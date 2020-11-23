@@ -18,3 +18,8 @@
 ### Standard Entry
 
 - you should provide a `logName` unless you're using a collector agent (e.g. fluentd or fluent-bit), which would rewrite `logName` to either `std_out` or `std_err`
+
+## Fluent Bit
+
+- does not need `logName`
+- does not need `resource`

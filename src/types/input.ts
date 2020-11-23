@@ -1,7 +1,65 @@
-import { CommonEntryMetadata } from './entry.common';
-import { ClientHttpRequest } from './shared';
+import { O } from 'ts-toolbelt';
+import { DEFAULT_RESOURCE_TYPE, SEVERITY } from '../constants';
+import { ResourceMap } from '../__generated__/resources';
 
-export type ClientEntrySpecialMetadata = {
+export type Severity = keyof typeof SEVERITY;
+
+export type DefaultResourceType = typeof DEFAULT_RESOURCE_TYPE;
+
+export type ResourceType = keyof ResourceMap;
+
+export type ServiceContext = {
+	service: string;
+	version?: string;
+};
+
+// aka `data` when we send it through the client
+export type JsonPayload = {
+	/**
+	 * message is saved as textPayload if it is the only field remaining after the
+	 * Logging agent strips the other special-purpose fields and detect_json wasn't
+	 * enabled; otherwise message remains in jsonPayload. If your log entry contains
+	 * an exception stack trace, the exception stack trace should be set in this
+	 * message JSON log field, so that the exception stack trace can be parsed and
+	 * saved to Error Reporting.
+	 * ✅
+	 * */
+	message?: string | Error;
+	serviceContext?: ServiceContext;
+} & Record<string, unknown>;
+
+export type Resource<R extends ResourceType> = {
+	// we mark this optional as we'll reset it by default when R is specified during entry creation
+	type: R;
+	labels: ResourceMap[R];
+};
+
+// duration e.g. `2.000000500s` (2s 500nanos)
+export type Duration = { seconds?: number; nanos?: number };
+
+export type HttpRequest = {
+	requestMethod?: string;
+	requestUrl?: string;
+	requestSize?: number;
+	status?: number;
+	responseSize?: number;
+	userAgent?: string;
+	remoteIp?: string;
+	serverIp?: string;
+	referer?: string;
+	latency?: Duration | number;
+	cacheHit?: boolean;
+	cacheLookup?: boolean;
+	cacheFillBytes?: number;
+	protocol?: string;
+	/**
+	 * Whether or not the response was validated with the origin server before being
+	 * served from cache. This field is only meaningful if cacheHit is True.
+	 */
+	cacheValidatedWithOriginServer?: boolean;
+};
+
+export type Metadata = {
 	/**
 	 * we allow further metadata labels for an entry
 	 */
@@ -72,14 +130,15 @@ export type ClientEntrySpecialMetadata = {
 		line: number;
 		function?: string;
 	};
-};
 
-/**
- * This is the default Metadata for entries
- */
+	/**
+	 * logName can be set for each entry (e.g. to say std_err and std_out)
+	 */
+	logName?: string;
 
-// Omit<LogEntry, 'logName' | 'resource' | 'receiveTimestamp' | 'protoPayload' | 'jsonPayload' | 'textPayload'> {
-export interface ClientEntryMetadata extends ClientEntrySpecialMetadata, CommonEntryMetadata {
+	// ✅
+	severity?: Severity;
+
 	/** LogEntry timestamp */
 	timestamp?: Date;
 
@@ -100,5 +159,7 @@ export interface ClientEntryMetadata extends ClientEntrySpecialMetadata, CommonE
 	 * latency takes seconds and nanos, whereas seconds must be full integers (floats are reduced to int e.g. 2.4 = 2)
 	 * Whereas the latency std output must be a string
 	 */
-	httpRequest?: ClientHttpRequest;
-}
+	httpRequest?: HttpRequest;
+};
+
+export type NonNullableMetadata = O.NonNullable<Metadata, keyof Metadata, 'deep'>; // DeepNonNullable<Metadata>;

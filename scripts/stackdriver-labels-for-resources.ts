@@ -31,7 +31,7 @@ async function run() {
 		};
 	});
 
-	// labelsForResource.unshift({ resource: 'auto', labels: [] });
+	labelsForResource.unshift({ resource: 'auto', labels: [] });
 
 	const LABELS_ARRAY = labelsForResource
 		.map(({ resource, labels }) => {

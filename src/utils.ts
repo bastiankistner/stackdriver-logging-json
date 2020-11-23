@@ -1,16 +1,14 @@
+import { HttpRequestOutput, MetadataOutput } from 'types/output';
+import { MetadataOutputStd } from 'types/output.std';
 import { CLIENT_KEYS_TO_SPECIAL_STD_KEYS, PATTERN_PROJECT_ID, PATTERN_TRACE_ID } from './constants';
-import type { ClientEntrySpecialMetadata } from './types/entry.client';
-import { StdEntrySpecialMetadata } from './types/entry.std';
-import { ClientHttpRequest, Duration } from './types/shared';
+import type { HttpRequest, Duration } from './types/input';
 
 /**
  * Converts Stackdriver special fields into their corresponding
  * named keys that can be picked up by fluentd or fluent-bit
  * @param metadata
  */
-export function convertClientMetadataToStdMetadata<T extends ClientEntrySpecialMetadata>(
-	metadata: T
-): Omit<T, keyof ClientEntrySpecialMetadata> & StdEntrySpecialMetadata {
+export function convertClientMetadataToStdMetadata<T extends MetadataOutput>(metadata: T): MetadataOutputStd<T> {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const resultingMetadata: any = { ...metadata };
 
@@ -22,7 +20,7 @@ export function convertClientMetadataToStdMetadata<T extends ClientEntrySpecialM
 		delete resultingMetadata[clientKey];
 	});
 
-	return resultingMetadata as Omit<T, keyof ClientEntrySpecialMetadata> & StdEntrySpecialMetadata;
+	return resultingMetadata as MetadataOutputStd<T>;
 }
 
 // TODO: check if this results in sourcemap, if not, use new nodejs api if available
@@ -71,21 +69,18 @@ export function createFullyQualifiedIdentifier(
 	return `projects/${projectId}/${type}/${fullyQualifiedIdentifier}`;
 }
 
-export function formatClientHttpRequest(
-	clientHttpRequest?: ClientHttpRequest
-): (ClientHttpRequest & { latency?: Duration }) | undefined {
-	//
-	if (typeof clientHttpRequest === 'undefined') {
+export function formatHttpRequest(httpRequest?: HttpRequest): HttpRequestOutput | undefined {
+	if (typeof httpRequest === 'undefined') {
 		return undefined;
 	}
 
 	let seconds = 0;
 	let nanos = 0;
 
-	const { latency, ...httpRequest } = clientHttpRequest;
+	const { latency, ...rest } = httpRequest;
 
 	if (typeof latency === 'undefined') {
-		return httpRequest;
+		return rest;
 	}
 
 	if (typeof latency === 'number') {
@@ -97,7 +92,7 @@ export function formatClientHttpRequest(
 	}
 
 	return {
-		...httpRequest,
+		...rest,
 		latency: {
 			seconds,
 			nanos,

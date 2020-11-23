@@ -1,148 +1,146 @@
 /* eslint-disable prefer-const */
 import { EventId } from 'eventid';
-import { ClientEntryMetadata } from './types/entry.client';
-import {
-	DefaultMetadataWithOptionalResource,
-	JsonPayload,
-	ResourceTypeKeys,
-	DefaultResourceKey,
-	DefaultMetadata,
-	Resource,
-} from './types/shared';
-import { formatMessage, createFullyQualifiedIdentifier, mergeLabels, formatClientHttpRequest } from './utils';
-import { DEFAULT_RESOURCE_TYPE } from './constants';
-import { LABELS } from './__generated__/resources';
-import type { DeepRequired } from 'utility-types';
+import type { Metadata, ResourceType, JsonPayload, Resource, DefaultResourceType } from './types/input';
+import { formatMessage, createFullyQualifiedIdentifier, formatHttpRequest } from './utils';
+import { DEFAULT_RESOURCE_TYPE, SEVERITY } from './constants';
+import { DataOutput, MetadataOutput } from 'types/output';
 
 const eventId = new EventId();
 
-//
-//
-//
 // TODO: SIMPLIFY WITH HELPERS
 
 // - [ ] create a single interface that takes ALL params but as a nice object as below
 // - [ ] create helpers for `createPayload`, `createService`, `createRequest`, `createResource` ... ?
 // - [ ] maybe return those helpers / use a simple state that will then be passed to those helpers as first argument (similar to hooks) that can then be returned
 // - [ ] that function will then also be able to dynamically type that state object
-// - [ ] similar to createContext ? 
+// - [ ] similar to createContext ?
 // - [ ] type the params in this function so that we always know what we'll get back
 // - [ ] is resource the only dynamic type
 // - [ ] don't do all the modified stuff
 
-//
-//
-//
-
-
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function createEntry<
-	R extends ResourceTypeKeys,
 	P extends JsonPayload,
-	M = DefaultMetadataWithOptionalResource<R> & ClientEntryMetadata
->(options: {
+	M extends Metadata = Metadata,
+	R extends ResourceType = DefaultResourceType
+>({
+	projectId,
+	resource,
+	metadata,
+	payload,
+}: {
 	projectId: string;
-	resource?: DefaultResourceKey | Resource<R>;
+	resource?: Resource<R>;
 	metadata: M;
 	payload: P;
 }): {
 	// metadata: R extends DefaultResourceKey ? Omit<Metadata<R>, 'resource'> : Metadata<R>;
-	metadata: DefaultMetadataWithOptionalResource<R>; // & {labels: typeof M['labels'] & typeof entryMetadata['labels']};
-	data: P;
+	metadata: MetadataOutput<R, M>; // Intersection<MetadataOutput<R, M>, WithOptionalResource<Metadata, R>>; // & {labels: typeof M['labels'] & typeof entryMetadata['labels']};
+	data: DataOutput<P>;
 } {
-	const { labels, logName, trace, httpRequest, ...modifiedMetadata } = options.metadata;
+	const metadataOutput: MetadataOutput = {} as MetadataOutput;
 
-	let { message, serviceContext } = options.payload;
+	let { message, serviceContext, ...payloadRest } = payload;
 
-	// merge labels:
+	const {
+		httpRequest,
+		insertId,
+		labels,
+		logName,
+		operation,
+		severity,
+		sourceLocation,
+		spanId,
+		timestamp,
+		trace,
+		traceSampled,
+		...metadataRest
+	} = metadata;
 
-	// set defaults
-
-	if (!(modifiedEntryMetadata.timestamp instanceof Date)) {
-		modifiedEntryMetadata.timestamp = new Date();
+	if (httpRequest) {
+		metadataOutput.httpRequest = formatHttpRequest(httpRequest);
 	}
 
-	if (typeof modifiedEntryMetadata.insertId !== 'string') {
-		modifiedEntryMetadata.insertId = eventId.new();
+	metadataOutput.insertId = insertId || eventId.new();
+
+	if (labels) {
+		metadataOutput.labels = labels;
 	}
 
-	// delete resource if type is auto
-	if (modifiedMetadata.resource?.type === DEFAULT_RESOURCE_TYPE) {
-		delete modifiedMetadata.resource;
-		// modifiedDefaultMetadata.resource = { ...modifiedDefaultMetadata.resource, type: DEFAULT_RESOURCE_TYPE as R };
+	if (logName) {
+		metadataOutput.logName = createFullyQualifiedIdentifier('logs', logName, projectId);
 	}
 
-	if (modifiedMetadata.resource?.type && modifiedMetadata.resource.type in LABELS_FOR_RESOURCES) {
-		const resourceLabels = LABELS_FOR_RESOURCES[modifiedMetadata.resource.type];
-
-		// add projectId as resource.labels['project_id'] if it can be set
-		if (Array.isArray(resourceLabels) && resourceLabels.includes('project_id')) {
-			// @ts-ignore
-			modifiedMetadata.resource.labels = {
-				...modifiedMetadata.resource.labels,
-				project_id: projectId,
-			};
-		}
+	if (operation) {
+		metadataOutput.operation = operation;
 	}
 
-	const potentiallyUndefinedData: JsonPayload = {};
+	metadataOutput.severity = severity || SEVERITY.DEFAULT;
+
+	if (sourceLocation) {
+		metadataOutput.sourceLocation = sourceLocation;
+	}
+
+	if (spanId) {
+		metadataOutput.spanId = spanId;
+	}
+
+	if (resource && resource.type !== DEFAULT_RESOURCE_TYPE) {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		(metadataOutput as any).resource = resource;
+	}
+
+	metadataOutput.timestamp = timestamp || new Date();
+
+	if (trace) {
+		metadataOutput.trace = createFullyQualifiedIdentifier('traces', trace, projectId);
+	}
+
+	if (traceSampled) {
+		metadataOutput.traceSampled = traceSampled;
+	}
+
+	const data: JsonPayload = {};
 
 	if (message) {
 		message = formatMessage(message);
-		potentiallyUndefinedData.message = message;
+		data.message = message;
 	}
 
 	if (serviceContext) {
-		potentiallyUndefinedData.serviceContext = serviceContext;
-	}
-
-	// formatted logName also works with the logging client
-	if (logName) {
-		logName = createFullyQualifiedIdentifier('logs', logName, projectId);
-	}
-
-	if (trace) {
-		trace = createFullyQualifiedIdentifier('traces', trace, projectId);
-	}
-
-	if (httpRequest) {
-		httpRequest = formatClientHttpRequest(httpRequest);
-	}
-
-	const potentiallyUndefinedMetadata: {
-		trace?: typeof trace;
-		labels?: typeof labels;
-		httpRequest?: ReturnType<typeof formatClientHttpRequest>;
-	} = {};
-
-	if (typeof trace !== 'undefined') {
-		potentiallyUndefinedMetadata.trace = trace;
-	}
-
-	if (typeof labels !== 'undefined' && Object.keys(labels).length > 0) {
-		potentiallyUndefinedMetadata.labels = labels;
-	}
-
-	if (typeof httpRequest !== 'undefined') {
-		potentiallyUndefinedMetadata.httpRequest = formatClientHttpRequest(httpRequest);
+		data.serviceContext = serviceContext;
 	}
 
 	return {
-		metadata: {
-			...modifiedMetadata,
-			...modifiedEntryMetadata,
-			...potentiallyUndefinedMetadata,
-			logName,
-		},
-		data: potentiallyUndefinedData,
+		// we have to cast to unknown first, as it seems we've got some issues with the Overwrite
+		metadata: ({ ...metadataOutput, ...metadataRest } as unknown) as MetadataOutput<R, M>,
+		data: ({ ...data, ...payloadRest } as unknown) as DataOutput<P>,
 	};
 }
 
 const entry = createEntry({
-	metadata: {},
-	payload: { message: 'sdfsdf', serviceContext: { service: '', version: '' } },
+	metadata: {
+		insertId: '123234',
+		spanId: '44444',
+		timestamp: new Date(),
+		httpRequest: {
+			latency: 4.3,
+			cacheHit: true,
+		},
+
+		labels: {
+			// a: 'sdfsdf',
+		},
+		// logName: 'ok',
+		// resource: { type: '', labels: { location: '', method: '', project_id: '', service: '', version: '' } },
+	},
+	payload: { message: 'sdfsdf', serviceContext: { service: '', version: '' }, wtf: true },
 	projectId: 'my-project',
-	resource: { type: 'api', labels: { location: '', method: '', project_id: '', service: '', version: '' } },
+	resource: {
+		type: 'apigee.googleapis.com/Environment',
+		labels: { location: '', method: '', project_id: '', service: '', version: '' },
+	},
 });
 
-entry.data.
+entry.metadata.httpRequest.latency;
+
+entry.data.wtf;
