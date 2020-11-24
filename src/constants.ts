@@ -34,8 +34,6 @@ export const CLIENT_KEYS_TO_SPECIAL_STD_KEYS = {
 	operation: 'logging.googleapis.com/operation',
 } as const;
 
-export const DEFAULT_RESOURCE_TYPE = 'auto' as const;
-
 export const RESOURCE_TYPES = Object.keys(LABELS_FOR_RESOURCE);
 
 // trace id must be 32 characters hexadecimal string

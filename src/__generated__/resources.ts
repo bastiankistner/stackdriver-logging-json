@@ -1,6 +1,5 @@
 // prettier-ignore
 export type ResourceMap = {
-	auto: undefined;
 	'aiplatform.googleapis.com/Endpoint': { resource_container: string; location: string; endpoint_id: string };
 	api: { project_id: string; service: string; method: string; version: string; location: string };
 	'apigee.googleapis.com/Environment': { resource_container: string; org: string; env: string; location: string };
@@ -198,7 +197,6 @@ export type ResourceMap = {
 };
 
 export const LABELS_FOR_RESOURCE: Record<keyof ResourceMap, readonly string[]> = {
-	auto: [] as const,
 	'aiplatform.googleapis.com/Endpoint': ['resource_container', 'location', 'endpoint_id'] as const,
 	api: ['project_id', 'service', 'method', 'version', 'location'] as const,
 	'apigee.googleapis.com/Environment': ['resource_container', 'org', 'env', 'location'] as const,

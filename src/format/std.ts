@@ -1,17 +1,32 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import { convertClientMetadataToStdMetadata } from '../utils';
-import { MetadataOutputStd } from '../types/output.std';
-import { DataOutput, MetadataOutput } from '../types/output';
+import { DataOutput, MetadataOutput, MetadataOutputParameter } from '../types/output';
+import { RewriteKey } from '../types/utils';
 
-export function entryToStd<M extends MetadataOutput = MetadataOutput, D extends DataOutput = DataOutput>(entry: {
+export type MetadataOutputStd<M extends MetadataOutput = MetadataOutput> = Omit<
+	M,
+	'insertId' | 'labels' | 'sourceLocation' | 'spanId' | 'trace' | 'traceSampled' | 'operation'
+> &
+	RewriteKey<M, 'insertId'> &
+	RewriteKey<M, 'labels'> &
+	RewriteKey<M, 'sourceLocation'> &
+	RewriteKey<M, 'spanId'> &
+	RewriteKey<M, 'trace'> &
+	RewriteKey<M, 'traceSampled'> &
+	RewriteKey<M, 'operation'>;
+
+export type FullMetadataOutputStdParameter = MetadataOutputStd<MetadataOutputParameter>;
+
+export function entryToStd<M extends MetadataOutput, D extends DataOutput = DataOutput>(entry: {
 	metadata: M;
 	data: D;
 }): MetadataOutputStd<M> & D {
 	const { metadata, data } = entry;
 
 	return {
+		// add metadata
+		...(convertClientMetadataToStdMetadata(metadata) as MetadataOutputStd<M>),
 		// spread payload on root
 		...data,
-		// add metadata
-		...convertClientMetadataToStdMetadata(metadata),
 	};
 }

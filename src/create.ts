@@ -1,11 +1,15 @@
 /* eslint-disable prefer-const */
 import { EventId } from 'eventid';
-import type { Metadata, ResourceType, JsonPayload, Resource, DefaultResourceType } from './types/input';
+import type { Metadata, ResourceType, JsonPayload, Resource } from './types/input';
 import { formatMessage, createFullyQualifiedIdentifier, formatHttpRequest } from './utils';
-import { DEFAULT_RESOURCE_TYPE, SEVERITY } from './constants';
-import { DataOutput, MetadataOutput } from 'types/output';
+import { SEVERITY } from './constants';
+import { DataOutput, MetadataOutput, MetadataOutputParameter } from 'types/output';
+import { entryToFluentBit130, entryToStd } from 'format';
+import { DeepPartial } from 'utility-types';
 
 const eventId = new EventId();
+
+// TODO: SCREW GENERIC INPUT AND OUPUT !!!! it's too complicated
 
 // TODO: SIMPLIFY WITH HELPERS
 
@@ -18,18 +22,14 @@ const eventId = new EventId();
 // - [ ] is resource the only dynamic type
 // - [ ] don't do all the modified stuff
 
-export function createEntry<
-	P extends JsonPayload,
-	M extends Metadata = Metadata,
-	R extends ResourceType = DefaultResourceType
->({
+export function createEntry<P extends JsonPayload, M extends Metadata, R extends ResourceType | undefined = undefined>({
 	projectId,
 	resource,
 	metadata,
 	payload,
 }: {
 	projectId: string;
-	resource?: Resource<R>;
+	resource?: R extends ResourceType ? Resource<R> : undefined;
 	metadata: M;
 	payload: P;
 }): {
@@ -37,7 +37,7 @@ export function createEntry<
 	metadata: MetadataOutput<R, M>; // Intersection<MetadataOutput<R, M>, WithOptionalResource<Metadata, R>>; // & {labels: typeof M['labels'] & typeof entryMetadata['labels']};
 	data: DataOutput<P>;
 } {
-	const metadataOutput: MetadataOutput = {} as MetadataOutput;
+	const metadataOutput: DeepPartial<MetadataOutputParameter> = {};
 
 	let { message, serviceContext, ...payloadRest } = payload;
 
@@ -84,9 +84,8 @@ export function createEntry<
 		metadataOutput.spanId = spanId;
 	}
 
-	if (resource && resource.type !== DEFAULT_RESOURCE_TYPE) {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		(metadataOutput as any).resource = resource;
+	if (resource && resource?.type !== undefined) {
+		metadataOutput.resource = resource;
 	}
 
 	metadataOutput.timestamp = timestamp || new Date();
@@ -123,7 +122,7 @@ const entry = createEntry({
 		spanId: '44444',
 		timestamp: new Date(),
 		httpRequest: {
-			latency: 4.3,
+			latency: 2000,
 			cacheHit: true,
 		},
 
@@ -140,6 +139,15 @@ const entry = createEntry({
 		labels: { location: '', method: '', project_id: '', service: '', version: '' },
 	},
 });
+
+entry.metadata.httpRequest.cacheHit;
+entry.metadata.httpRequest.latency;
+
+const e = entryToStd(entry);
+e.httpRequest.latency;
+
+const ef = entryToFluentBit130(entry);
+ef.httpRequest.latency;
 
 entry.metadata.httpRequest.latency;
 

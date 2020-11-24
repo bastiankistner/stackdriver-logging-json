@@ -1,5 +1,6 @@
-import { HttpRequestOutput, MetadataOutput } from 'types/output';
+import { MetadataOutput } from 'types/output';
 import { MetadataOutputStd } from 'types/output.std';
+import { Overwrite } from 'utility-types';
 import { CLIENT_KEYS_TO_SPECIAL_STD_KEYS, PATTERN_PROJECT_ID, PATTERN_TRACE_ID } from './constants';
 import type { HttpRequest, Duration } from './types/input';
 
@@ -69,7 +70,7 @@ export function createFullyQualifiedIdentifier(
 	return `projects/${projectId}/${type}/${fullyQualifiedIdentifier}`;
 }
 
-export function formatHttpRequest(httpRequest?: HttpRequest): HttpRequestOutput | undefined {
+export function formatHttpRequest(httpRequest?: HttpRequest) {
 	if (typeof httpRequest === 'undefined') {
 		return undefined;
 	}

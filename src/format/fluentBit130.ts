@@ -1,44 +1,65 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import { convertDurationToString } from '../utils';
 import { entryToStd } from './std';
-import { DataOutput, MetadataOutput } from 'types/output';
-import { MetadataOutputStdFluentBit13 } from 'types/output.std';
+import { DataOutput, MetadataOutput, MetadataOutputParameter } from '../types/output';
+import { MetadataOutputStd, FullMetadataOutputStdParameter } from './std';
+import { DeepPartial } from 'utility-types';
 
-export function entryToFluentBit130<M extends MetadataOutput = MetadataOutput, D extends DataOutput = DataOutput>({
+import { Overwrite } from 'utility-types';
+import { O } from 'ts-toolbelt';
+import { RewriteKey } from 'types/utils';
+
+export type MetadataOutputStdFluentBit13<M extends MetadataOutput> = Overwrite<
+	Omit<M, 'timestamp'>,
+	// M['httpRequest'] extends undefined ? {} : Overwrite<{} & M['httpRequest'], { latency: string }>
+	O.Path<M, ['httpRequest', 'latency']> extends undefined
+		? {}
+		: { httpRequest: Omit<M['httpRequest'], 'latency'> & { latency: string } }
+> &
+	RewriteKey<M, 'timestamp', 'time'>;
+
+export function entryToFluentBit130<MO extends MetadataOutput>({
 	metadata,
 	data,
 }: {
-	metadata: M;
-	data: D;
-}): MetadataOutputStdFluentBit13<M> & D {
-	delete metadata.traceSampled;
-	delete metadata.logName;
+	metadata: MO;
+	data: DataOutput;
+}): MetadataOutputStdFluentBit13<MO> & typeof data {
+	const { ...metadataCopy } = metadata as DeepPartial<MetadataOutputParameter>;
 
-	const { timestamp, httpRequest } = entry.metadata;
-
-	if ('resource' in entry.metadata) {
-		delete entry.metadata.resource;
+	if ('resource' in metadataCopy) {
+		delete metadataCopy.resource;
 	}
 
-	const { ...modifiedEntry } = entryToStd<M, D>({ metadata, data });
+	if ('logName' in metadataCopy) {
+		delete metadataCopy.logName;
+	}
 
-	// delete the following fields from log entry as fluent bit doesn't cover them / uses its own values
+	if ('traceSampled' in metadataCopy) {
+		delete metadataCopy.traceSampled;
+	}
 
-	// convert latency (duration) to string
-	const potentiallyUndefinedMetadata: { httpRequest?: typeof httpRequest & { latency?: string } } = {};
+	const stdEntry = entryToStd({ metadata: metadataCopy as MO, data }) as DeepPartial<FullMetadataOutputStdParameter>;
 
-	if (typeof httpRequest !== 'undefined') {
-		potentiallyUndefinedMetadata.httpRequest = httpRequest;
+	const { httpRequest, timestamp, ...stdEntryRest } = stdEntry;
 
-		if (typeof httpRequest.latency !== 'undefined') {
-			potentiallyUndefinedMetadata.httpRequest.latency = convertDurationToString(httpRequest.latency);
+	const metadataResult: DeepPartial<MetadataOutputStdFluentBit13<MetadataOutputStd>> = { ...stdEntryRest };
+	metadataResult.httpRequest?.latency;
+
+	if (timestamp) {
+		metadataResult.time = timestamp;
+	}
+
+	if (httpRequest) {
+		const { latency, ...httpRequestRest } = httpRequest;
+		metadataResult.httpRequest = httpRequestRest;
+		if (latency) {
+			metadataResult.httpRequest.latency = convertDurationToString(latency);
 		}
 	}
 
 	return {
-		...rest,
-		// we need time instead of timestamp for std entries
-		time: timestamp,
-		// this won't add `httpRequest` in case it's undefined
-		...potentiallyUndefinedMetadata,
+		...(metadataResult as MetadataOutputStdFluentBit13<MO>),
+		...data,
 	};
 }
