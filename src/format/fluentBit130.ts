@@ -18,13 +18,13 @@ export type MetadataOutputStdFluentBit13<M extends MetadataOutput> = Overwrite<
 > &
 	RewriteKey<M, 'timestamp', 'time'>;
 
-export function entryToFluentBit130<MO extends MetadataOutput>({
+export function entryToFluentBit130<M extends MetadataOutput, MS extends MetadataOutputStd<M>, D extends DataOutput>({
 	metadata,
 	data,
 }: {
-	metadata: MO;
-	data: DataOutput;
-}): MetadataOutputStdFluentBit13<MO> & typeof data {
+	metadata: M;
+	data: D;
+}): MetadataOutputStdFluentBit13<MS> & { jsonPayload: D } {
 	const { ...metadataCopy } = metadata as DeepPartial<MetadataOutputParameter>;
 
 	if ('resource' in metadataCopy) {
@@ -39,9 +39,9 @@ export function entryToFluentBit130<MO extends MetadataOutput>({
 		delete metadataCopy.traceSampled;
 	}
 
-	const stdEntry = entryToStd({ metadata: metadataCopy as MO, data }) as DeepPartial<FullMetadataOutputStdParameter>;
+	const stdEntry = entryToStd({ metadata: metadataCopy as M, data });
 
-	const { httpRequest, timestamp, ...stdEntryRest } = stdEntry;
+	const { jsonPayload, httpRequest, timestamp, ...stdEntryRest } = stdEntry;
 
 	const metadataResult: DeepPartial<MetadataOutputStdFluentBit13<MetadataOutputStd>> = { ...stdEntryRest };
 	metadataResult.httpRequest?.latency;
@@ -59,7 +59,9 @@ export function entryToFluentBit130<MO extends MetadataOutput>({
 	}
 
 	return {
-		...(metadataResult as MetadataOutputStdFluentBit13<MO>),
-		...data,
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		...(metadataResult as MetadataOutputStdFluentBit13<MS>),
+		jsonPayload,
 	};
 }

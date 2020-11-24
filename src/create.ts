@@ -110,7 +110,7 @@ export function createEntry<P extends JsonPayload, M extends Metadata, R extends
 	}
 
 	return {
-		// we have to cast to unknown first, as it seems we've got some issues with the Overwrite
+		// since we're also returning the 'rest', we need to cast to unknown first
 		metadata: ({ ...metadataOutput, ...metadataRest } as unknown) as MetadataOutput<R, M>,
 		data: ({ ...data, ...payloadRest } as unknown) as DataOutput<P>,
 	};
@@ -127,7 +127,7 @@ const entry = createEntry({
 		},
 
 		labels: {
-			// a: 'sdfsdf',
+			a: 'sdfsdf',
 		},
 		// logName: 'ok',
 		// resource: { type: '', labels: { location: '', method: '', project_id: '', service: '', version: '' } },
@@ -135,7 +135,7 @@ const entry = createEntry({
 	payload: { message: 'sdfsdf', serviceContext: { service: '', version: '' }, wtf: true },
 	projectId: 'my-project',
 	resource: {
-		type: 'apigee.googleapis.com/Environment',
+		type: 'aiplatform.googleapis.com/Endpoint',
 		labels: { location: '', method: '', project_id: '', service: '', version: '' },
 	},
 });
@@ -145,9 +145,13 @@ entry.metadata.httpRequest.latency;
 
 const e = entryToStd(entry);
 e.httpRequest.latency;
+e['logging.googleapis.com/labels'].a
+e.jsonPayload.
+
 
 const ef = entryToFluentBit130(entry);
 ef.httpRequest.latency;
+ef.jsonPayload.
 
 entry.metadata.httpRequest.latency;
 
