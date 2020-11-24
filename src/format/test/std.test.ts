@@ -7,7 +7,9 @@ describe('test std formatter', () => {
 		const entry = createEntry({
 			projectId: 'my-project-id',
 			metadata: {
-				httpRequest: { latency: { seconds: 1000, nanos: 888 }, cacheHit: true },
+				httpRequest: { latency: { seconds: 1000, nanos: 8 }, cacheHit: true },
+				insertId: '234234',
+				trace: '123123',
 			},
 			payload: {
 				message: new Error('hello'),
@@ -44,7 +46,7 @@ describe('test std formatter', () => {
 		    "httpRequest": Object {
 		      "cacheHit": true,
 		      "latency": Object {
-		        "nanos": 888,
+		        "nanos": 8,
 		        "seconds": 1000,
 		      },
 		    },
@@ -59,8 +61,12 @@ describe('test std formatter', () => {
 		const stdEntry = entryToStd(entry);
 		stdEntry.httpRequest.latency;
 		console.log(stdEntry.httpRequest.latency);
+		console.log(stdEntry['logging.googleapis.com/insertId']);
+		console.log(stdEntry['logging.googleapis.com/trace']);
 
 		const stdFbEntry = entryToFluentBit130(entry);
-		console.log(stdFbEntry.httpRequest.latency.toString());
+		console.log(stdFbEntry.httpRequest.latency);
+		console.log(stdFbEntry['logging.googleapis.com/insertId']);
+		console.log(stdFbEntry['logging.googleapis.com/trace']);
 	});
 });

@@ -51,7 +51,6 @@ export function entryToFluentBit130<M extends MetadataOutput, MS extends Metadat
 	if (timestamp) {
 		metadataResult.time = timestamp;
 	}
-	console.log('httpRequest', httpRequest);
 
 	if (typeof httpRequest !== 'undefined') {
 		const { latency, ...httpRequestRest } = httpRequest;
@@ -61,11 +60,7 @@ export function entryToFluentBit130<M extends MetadataOutput, MS extends Metadat
 		}
 	}
 
-	console.log(metadataResult.httpRequest);
-
 	return {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
 		...(metadataResult as MetadataOutputStdFluentBit13<MS>),
 		jsonPayload,
 	};

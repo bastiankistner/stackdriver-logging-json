@@ -2,6 +2,7 @@ import { MetadataOutput } from './types/output';
 import { MetadataOutputStd } from './format/std';
 import { CLIENT_KEYS_TO_SPECIAL_STD_KEYS, PATTERN_PROJECT_ID, PATTERN_TRACE_ID } from './constants';
 import type { HttpRequest, Duration } from './types/input';
+import { format } from 'mathjs';
 
 /**
  * Converts Stackdriver special fields into their corresponding
@@ -112,7 +113,7 @@ export function convertDurationToString(duration?: Duration | number) {
 	}
 
 	if (typeof duration.nanos === 'number' && duration.nanos > 0) {
-		nanosString = `${String(duration.nanos / 10 ** 9).split('.')[1] ?? 0}`;
+		nanosString = `${String(format(duration.nanos / 10 ** 9, { notation: 'fixed' })).split('.')[1] ?? 0}`;
 	}
 
 	const durationAsString = `${duration.seconds ?? 0}.${nanosString}s`;
