@@ -1,4 +1,4 @@
-import { LABELS_FOR_RESOURCE } from '__generated__/resources';
+import { LABELS_FOR_RESOURCE } from './__generated__/resources';
 
 export const SEVERITY = {
 	DEFAULT: 'DEFAULT',

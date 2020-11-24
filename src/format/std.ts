@@ -25,7 +25,7 @@ export function entryToStd<M extends MetadataOutput, D extends DataOutput = Data
 
 	return {
 		// add metadata
-		...(convertClientMetadataToStdMetadata(metadata) as MetadataOutputStd<M>),
+		...convertClientMetadataToStdMetadata(metadata),
 		// spread payload on root
 		jsonPayload: data,
 	};

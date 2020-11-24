@@ -1,20 +1,21 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { convertDurationToString } from '../utils';
-import { entryToStd } from './std';
+import { entryToStd, FullMetadataOutputStdParameter } from './std';
 import { DataOutput, MetadataOutput, MetadataOutputParameter } from '../types/output';
-import { MetadataOutputStd, FullMetadataOutputStdParameter } from './std';
-import { DeepPartial } from 'utility-types';
-
-import { Overwrite } from 'utility-types';
+import { MetadataOutputStd } from './std';
+import { DeepPartial, Overwrite } from 'utility-types';
 import { O } from 'ts-toolbelt';
-import { RewriteKey } from 'types/utils';
+import { RewriteKey } from '../types/utils';
+import { Duration } from '../types/input';
 
 export type MetadataOutputStdFluentBit13<M extends MetadataOutput> = Overwrite<
-	Omit<M, 'timestamp'>,
+	Exclude<Omit<M, 'timestamp'>, 'httpRequest'>,
 	// M['httpRequest'] extends undefined ? {} : Overwrite<{} & M['httpRequest'], { latency: string }>
-	O.Path<M, ['httpRequest', 'latency']> extends undefined
+	M['httpRequest'] extends undefined
 		? {}
-		: { httpRequest: Omit<M['httpRequest'], 'latency'> & { latency: string } }
+		: O.Path<M, ['httpRequest', 'latency']> extends number | Duration
+		? { httpRequest: O.Overwrite<{} & M['httpRequest'], { latency: string }> }
+		: {}
 > &
 	RewriteKey<M, 'timestamp', 'time'>;
 
@@ -39,24 +40,28 @@ export function entryToFluentBit130<M extends MetadataOutput, MS extends Metadat
 		delete metadataCopy.traceSampled;
 	}
 
-	const stdEntry = entryToStd({ metadata: metadataCopy as M, data });
+	const stdEntry = entryToStd({ metadata: metadataCopy as FullMetadataOutputStdParameter, data });
 
 	const { jsonPayload, httpRequest, timestamp, ...stdEntryRest } = stdEntry;
 
-	const metadataResult: DeepPartial<MetadataOutputStdFluentBit13<MetadataOutputStd>> = { ...stdEntryRest };
+	const metadataResult: DeepPartial<MetadataOutputStdFluentBit13<FullMetadataOutputStdParameter>> = { ...stdEntryRest };
+
 	metadataResult.httpRequest?.latency;
 
 	if (timestamp) {
 		metadataResult.time = timestamp;
 	}
+	console.log('httpRequest', httpRequest);
 
-	if (httpRequest) {
+	if (typeof httpRequest !== 'undefined') {
 		const { latency, ...httpRequestRest } = httpRequest;
 		metadataResult.httpRequest = httpRequestRest;
-		if (latency) {
+		if (typeof latency !== 'undefined') {
 			metadataResult.httpRequest.latency = convertDurationToString(latency);
 		}
 	}
+
+	console.log(metadataResult.httpRequest);
 
 	return {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment

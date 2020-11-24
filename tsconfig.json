@@ -6,8 +6,7 @@
 		"noEmit": true,
 		"declaration": true,
 		"sourceMap": true,
-		"baseUrl": "./src",
-		"lib": ["ES2020", "DOM"],
-		"typeRoots": ["node_modules/@types", "./@types"]
-	}
+		"typeRoots": ["node_modules/@types", "./@types"],
+	},
+	"include": ["src/**/*"]
 }

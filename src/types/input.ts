@@ -1,4 +1,5 @@
 import { O } from 'ts-toolbelt';
+import { DeepRequired } from 'utility-types';
 import { DEFAULT_RESOURCE_TYPE, SEVERITY } from '../constants';
 import { ResourceMap } from '../__generated__/resources';
 
@@ -160,6 +161,12 @@ export type Metadata = {
 	 * Whereas the latency std output must be a string
 	 */
 	httpRequest?: HttpRequest;
+};
+
+export type AllMetadata = DeepRequired<Omit<Metadata, 'timestamp' | 'httpRequest'>> & {
+	timestamp: Date;
+	httpRequest: DeepRequired<Metadata['httpRequest']>;
+	resource: DeepRequired<Resource<ResourceType>>;
 };
 
 export type NonNullableMetadata = O.NonNullable<Metadata, keyof Metadata, 'deep'>; // DeepNonNullable<Metadata>;
