@@ -1,23 +1,9 @@
-import { createEntry } from '../../create';
 import { entryToFluentBit130 } from '../fluentBit130';
 import { entryToStd } from '../std';
+import { entry } from './entry';
 
 describe('test std formatter', () => {
 	test.only('full example', () => {
-		const entry = createEntry({
-			projectId: 'my-project-id',
-			metadata: {
-				httpRequest: { latency: { seconds: 1000, nanos: 8 }, cacheHit: true },
-				insertId: '234234',
-				trace: '123123',
-			},
-			payload: {
-				message: new Error('hello'),
-				serviceContext: { service: 'my-service', version: '1.0.0' },
-				and: { some: 'more' },
-			},
-		});
-
 		console.log(entry);
 
 		expect(entry).toMatchInlineSnapshot(
@@ -44,29 +30,56 @@ describe('test std formatter', () => {
 		  },
 		  "metadata": Object {
 		    "httpRequest": Object {
+		      "cacheFillBytes": 2222,
 		      "cacheHit": true,
+		      "cacheLookup": true,
+		      "cacheValidatedWithOriginServer": true,
 		      "latency": Object {
 		        "nanos": 8,
 		        "seconds": 1000,
 		      },
+		      "protocol": "https",
+		      "referer": "https://my-referrer.com",
+		      "remoteIp": "123.123.123.123",
+		      "requestMethod": "PUT",
+		      "requestSize": 1111,
+		      "requestUrl": "https://my-request-url.com/path?2323=sdfsdf",
+		      "responseSize": 3333,
+		      "serverIp": "111.111.111.111",
+		      "status": 202,
+		      "userAgent": "my/chrome",
 		    },
 		    "insertId": Any<String>,
-		    "severity": "DEFAULT",
+		    "labels": Object {
+		      "label": "my-label",
+		      "test": "test",
+		    },
+		    "logName": "projects/my-project-id/logs/my_log",
+		    "operation": Object {
+		      "first": true,
+		      "id": "operation-id",
+		      "last": true,
+		      "producer": "producer-name",
+		    },
+		    "severity": "ALERT",
+		    "sourceLocation": Object {
+		      "file": "my-file.ts",
+		      "function": "myFunction",
+		      "line": 444,
+		    },
+		    "spanId": "my-span-id",
 		    "timestamp": Any<Date>,
+		    "trace": "projects/my-project-id/traces/123123",
+		    "traceSampled": true,
 		  },
 		}
 	`
 		);
 
 		const stdEntry = entryToStd(entry);
-		stdEntry.httpRequest.latency;
-		console.log(stdEntry.httpRequest.latency);
-		console.log(stdEntry['logging.googleapis.com/insertId']);
-		console.log(stdEntry['logging.googleapis.com/trace']);
+		console.log(JSON.stringify(stdEntry, null, 4));
 
 		const stdFbEntry = entryToFluentBit130(entry);
-		console.log(stdFbEntry.httpRequest.latency);
-		console.log(stdFbEntry['logging.googleapis.com/insertId']);
-		console.log(stdFbEntry['logging.googleapis.com/trace']);
+		console.log(JSON.stringify(stdFbEntry, null, 4));
 	});
 });

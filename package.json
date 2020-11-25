@@ -52,6 +52,7 @@
 	},
 	"peerDependencies": {},
 	"dependencies": {
+		"@google-cloud/precise-date": "2.0.3",
 		"eventid": "1.0.0",
 		"mathjs": "8.0.1"
 	}

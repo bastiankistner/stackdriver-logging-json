@@ -5,6 +5,7 @@ import { formatMessage, createFullyQualifiedIdentifier, formatHttpRequest } from
 import { SEVERITY } from './constants';
 import { DataOutput, MetadataOutput, MetadataOutputParameter } from './types/output';
 import { DeepPartial } from 'utility-types';
+import { PreciseDate } from '@google-cloud/precise-date';
 
 const eventId = new EventId();
 
@@ -73,7 +74,7 @@ export function createEntry<P extends JsonPayload, M extends Metadata, R extends
 		metadataOutput.resource = resource;
 	}
 
-	metadataOutput.timestamp = timestamp || new Date();
+	metadataOutput.timestamp = timestamp || new PreciseDate().toISOString();
 
 	if (trace) {
 		metadataOutput.trace = createFullyQualifiedIdentifier('traces', trace, projectId);

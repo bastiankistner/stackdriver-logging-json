@@ -54,5 +54,3 @@ export function initLogger(defaultMetadata: DefaultMetadataWithOptionalResource<
 }
 
 void initLogger();
-
-console.log('ok');

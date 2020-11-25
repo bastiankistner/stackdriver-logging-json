@@ -141,7 +141,7 @@ export type Metadata = {
 	severity?: Severity;
 
 	/** LogEntry timestamp */
-	timestamp?: Date;
+	timestamp?: Date | string;
 
 	/** LogEntry protoPayload */
 	// protoPayload?: LogEntry['protoPayload'];
@@ -164,7 +164,7 @@ export type Metadata = {
 };
 
 export type AllMetadata = DeepRequired<Omit<Metadata, 'timestamp' | 'httpRequest'>> & {
-	timestamp: Date;
+	timestamp: Metadata['timestamp'];
 	httpRequest: DeepRequired<Metadata['httpRequest']>;
 	resource: DeepRequired<Resource<ResourceType>>;
 };

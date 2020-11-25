@@ -20,13 +20,13 @@ export type FullMetadataOutputStdParameter = MetadataOutputStd<MetadataOutputPar
 export function entryToStd<M extends MetadataOutput, D extends DataOutput = DataOutput>(entry: {
 	metadata: M;
 	data: D;
-}): MetadataOutputStd<M> & { jsonPayload: D } {
+}): MetadataOutputStd<M> & D {
 	const { metadata, data } = entry;
 
 	return {
+		// spread payload on root first to not overwrite metadata
+		...data,
 		// add metadata
 		...convertClientMetadataToStdMetadata(metadata),
-		// spread payload on root
-		jsonPayload: data,
 	};
 }

@@ -25,7 +25,7 @@ export function entryToFluentBit130<M extends MetadataOutput, MS extends Metadat
 }: {
 	metadata: M;
 	data: D;
-}): MetadataOutputStdFluentBit13<MS> & { jsonPayload: D } {
+}): MetadataOutputStdFluentBit13<MS> & D {
 	const { ...metadataCopy } = metadata as DeepPartial<MetadataOutputParameter>;
 
 	if ('resource' in metadataCopy) {
@@ -42,26 +42,25 @@ export function entryToFluentBit130<M extends MetadataOutput, MS extends Metadat
 
 	const stdEntry = entryToStd({ metadata: metadataCopy as FullMetadataOutputStdParameter, data });
 
-	const { jsonPayload, httpRequest, timestamp, ...stdEntryRest } = stdEntry;
+	const { httpRequest, timestamp, ...stdEntryRest } = stdEntry;
 
-	const metadataResult: DeepPartial<MetadataOutputStdFluentBit13<FullMetadataOutputStdParameter>> = { ...stdEntryRest };
+	const result: DeepPartial<MetadataOutputStdFluentBit13<FullMetadataOutputStdParameter>> = { ...stdEntryRest };
 
-	metadataResult.httpRequest?.latency;
+	result.httpRequest?.latency;
 
 	if (timestamp) {
-		metadataResult.time = timestamp;
+		result.time = timestamp;
 	}
 
 	if (typeof httpRequest !== 'undefined') {
 		const { latency, ...httpRequestRest } = httpRequest;
-		metadataResult.httpRequest = httpRequestRest;
+		result.httpRequest = httpRequestRest;
 		if (typeof latency !== 'undefined') {
-			metadataResult.httpRequest.latency = convertDurationToString(latency);
+			result.httpRequest.latency = convertDurationToString(latency);
 		}
 	}
 
 	return {
-		...(metadataResult as MetadataOutputStdFluentBit13<MS>),
-		jsonPayload,
+		...(result as MetadataOutputStdFluentBit13<MS> & D),
 	};
 }
