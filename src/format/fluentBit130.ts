@@ -19,11 +19,19 @@ export type MetadataOutputStdFluentBit13<M extends MetadataOutput> = Overwrite<
 > &
 	RewriteKey<M, 'timestamp', 'time'>;
 
-export function entryToFluentBit130<M extends MetadataOutput, MS extends MetadataOutputStd<M>, D extends DataOutput>({
+// TODO : I believe that because we say `metadata: M` and `M` is `MetadataOutput` but not MetadataOutput<R,M> as
+// the createEntry function returns (!!) we cannot pass `MetadataOutput<R,M>` as `MetadataOutput`
+//
+// the following works: `format.entryToStd({ metadata: (entry.metadata as unknown) as MetadataOutput, data: entry.data })`
+//
+// however, what's really weird
+//
+
+export function entryToFluentBit130<MS extends MetadataOutputStd<MetadataOutput>, D extends DataOutput>({
 	metadata,
 	data,
 }: {
-	metadata: M;
+	metadata: MetadataOutput;
 	data: D;
 }): MetadataOutputStdFluentBit13<MS> & D {
 	const { ...metadataCopy } = metadata as DeepPartial<MetadataOutputParameter>;

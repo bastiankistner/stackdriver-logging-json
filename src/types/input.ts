@@ -29,7 +29,7 @@ export type JsonPayload<D = Data> = {
 	serviceContext?: ServiceContext;
 } & D;
 
-export type Resource<R extends ResourceType> = {
+export type Resource<R extends ResourceType = ResourceType> = {
 	// we mark this optional as we'll reset it by default when R is specified during entry creation
 	type: R;
 	labels: ResourceMap[R];

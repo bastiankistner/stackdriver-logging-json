@@ -11,7 +11,7 @@ async function writeToClient() {
 
 	console.log('new Entry');
 
-	metadata.httpRequest.requestMethod = 'PUT';
+	// metadata.httpRequest.requestMethod = 'PUT';
 	const loggingClientEntry = new Entry(metadata, data);
 
 	console.log('new Logging');
@@ -38,7 +38,8 @@ async function writeToFluentBit() {
 	const url = useLocalhost ? 'http://localhost:8080/test' : 'https://graphql.sanalytics.io/test';
 
 	const body = entryToFluentBit130(entry);
-	body.httpRequest.requestMethod = 'POST';
+	entry.metadata.resource.type;
+	// body.httpRequest.requestMethod = 'POST';
 	body.message = `fluent - ${body.message}`;
 
 	const response = await fetch(url, {
