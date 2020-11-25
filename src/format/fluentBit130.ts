@@ -27,11 +27,11 @@ export type MetadataOutputStdFluentBit13<M extends MetadataOutput> = Overwrite<
 // however, what's really weird
 //
 
-export function entryToFluentBit130<MS extends MetadataOutputStd<MetadataOutput>, D extends DataOutput>({
+export function entryToFluentBit130<M extends MetadataOutput, MS extends MetadataOutputStd<M>, D extends DataOutput>({
 	metadata,
 	data,
 }: {
-	metadata: MetadataOutput;
+	metadata: M;
 	data: D;
 }): MetadataOutputStdFluentBit13<MS> & D {
 	const { ...metadataCopy } = metadata as DeepPartial<MetadataOutputParameter>;

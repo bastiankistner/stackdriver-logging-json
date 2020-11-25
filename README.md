@@ -9,6 +9,10 @@
 - ✅ compliant with std output (e.g. for kubernetes)
 - ✅ includes formatter for fluent-bit 1.3.0
 
+## IMPORTANT ⚠️
+
+To use with typescript, ensure you have `"strictNullChecks": true,` set in your `tsconfig.json`. Otherwise typescript will complain about `never` incompatiblity with string related to `resource` when passing an entry to a formatter.
+
 ## Tracing
 
 - will work out of the box when used with compatible library (e.g. OpenCensus or OpenTelemetry [recommended])
