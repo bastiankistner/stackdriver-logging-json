@@ -1,1 +1,0 @@
-{"version":3,"file":"std.js","sourceRoot":"","sources":["../../src/format/std.ts"],"names":[],"mappings":";;;AAAA,iDAAiD;AACjD,oCAA8D;AAkB9D,SAAgB,UAAU,CAA8D,KAGvF;IACA,MAAM,EAAE,QAAQ,EAAE,IAAI,EAAE,GAAG,KAAK,CAAC;IAEjC,OAAO;QACN,yDAAyD;QACzD,GAAG,IAAI;QACP,eAAe;QACf,GAAG,0CAAkC,CAAC,QAAQ,CAAC;KAC/C,CAAC;AACH,CAAC;AAZD,gCAYC"}
