@@ -13,6 +13,10 @@
 
 To use with typescript, ensure you have `"strictNullChecks": true,` set in your `tsconfig.json`. Otherwise typescript will complain about `never` incompatiblity with string related to `resource` when passing an entry to a formatter.
 
+SEE: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-0.html#--strictnullchecks
+
+TODO: maybe we could disble strict null checks and see if we're compatible without too many changes (but removing `undefined` from resource, httpRequest and wherever else we have used it in combination with generics)
+
 ## Tracing
 
 - will work out of the box when used with compatible library (e.g. OpenCensus or OpenTelemetry [recommended])
