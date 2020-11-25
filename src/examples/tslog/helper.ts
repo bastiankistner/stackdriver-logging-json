@@ -28,3 +28,16 @@ export function getMessage(current: MutableArgs) {
 		);
 	}
 }
+
+export function getLabels(current: MutableArgs, deleteLabelsFromArgs = true) {
+	let labels = {};
+
+	const labelArgs = current.args.filter((arg) => typeof arg === 'object' && 'labels' in arg);
+
+	labelArgs.forEach((arg) => {
+		labels = { ...labels, ...arg.labels };
+		if (deleteLabelsFromArgs) delete arg.labels;
+	});
+
+	return labels;
+}

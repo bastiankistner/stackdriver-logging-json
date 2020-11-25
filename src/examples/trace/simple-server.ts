@@ -3,7 +3,6 @@
 import express from 'express';
 import fetch from 'node-fetch';
 import { createLogger } from './logger';
-import { test } from './tracing';
 
 const app = express();
 
@@ -21,14 +20,12 @@ app.use(loggingMiddleware);
 let testCounter = 0;
 
 app.get('/test', async (req, res) => {
-	test();
 	testCounter++;
 
 	if (testCounter === 1) {
 		await wait(5);
 	}
 
-	test();
 	res.send('ok');
 });
 

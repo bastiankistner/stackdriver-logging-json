@@ -3,13 +3,11 @@
 
 import { auth } from 'google-auth-library';
 import { Logger } from 'tslog';
-import { SEVERITY_KEY } from '../../types/entry.common';
-import { DefaultMetadataWithOptionalResource } from '../../types/shared';
 import { entryToFluentBit130 } from '../../format/fluentBit130';
 
 import { createEntry } from '../../create';
 import { getMessage } from './helper';
-import { createSampleEntry } from '../entry';
+import { SEVERITY } from '../../constants';
 
 function write(data: Record<string, any>) {
 	process.stdout.write(JSON.stringify(data));
@@ -25,11 +23,11 @@ export function initLogger(defaultMetadata: DefaultMetadataWithOptionalResource<
 
 	const logger = new Logger({ suppressStdOutput: true });
 
-	const log = (severity: SEVERITY_KEY) => (...args: any[]) => {
+	const log = (severity: keyof typeof SEVERITY) => (...args: any[]) => {
 		const current = { args };
 		const message: string | Error | undefined = getMessage(current);
 
-		const entry = createEntry<'auto'>(
+		const entry = createEntry(
 			{ ...defaultMetadata, resource: { type: 'auto', labels: {} } },
 			{ message },
 			{ labels: { b: 'ok' } }

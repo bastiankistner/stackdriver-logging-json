@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 import { EventId } from 'eventid';
-import type { Metadata, ResourceType, JsonPayload, Resource } from './types/input';
+import type { Metadata, ResourceType, JsonPayload, Resource, Data } from './types/input';
 import { formatMessage, createFullyQualifiedIdentifier, formatHttpRequest } from './utils';
 import { SEVERITY } from './constants';
 import { DataOutput, MetadataOutput, MetadataOutputParameter } from './types/output';
@@ -9,23 +9,26 @@ import { PreciseDate } from '@google-cloud/precise-date';
 
 const eventId = new EventId();
 
-export function createEntry<P extends JsonPayload, M extends Metadata, R extends ResourceType | undefined = undefined>({
+export function createEntry<M extends Metadata, R extends ResourceType | undefined = undefined, D = Data>({
 	projectId,
 	resource,
+	serviceContext,
+	message,
 	metadata,
 	payload,
 }: {
+	// add message and service context here ?
 	projectId: string;
 	resource?: R extends ResourceType ? Resource<R> : undefined;
+	serviceContext?: JsonPayload['serviceContext'];
+	message?: JsonPayload['message'];
 	metadata: M;
-	payload: P;
+	payload?: D;
 }): {
 	metadata: MetadataOutput<R, M>;
-	data: DataOutput<P>;
+	data: JsonPayload<D>;
 } {
 	const metadataOutput: DeepPartial<MetadataOutputParameter> = {};
-
-	let { message, serviceContext, ...payloadRest } = payload;
 
 	const {
 		httpRequest,
@@ -84,11 +87,10 @@ export function createEntry<P extends JsonPayload, M extends Metadata, R extends
 		metadataOutput.traceSampled = traceSampled;
 	}
 
-	const data: JsonPayload = {};
+	const data: JsonPayload = { ...payload };
 
 	if (message) {
-		message = formatMessage(message);
-		data.message = message;
+		data.message = formatMessage(message);
 	}
 
 	if (serviceContext) {
@@ -98,6 +100,6 @@ export function createEntry<P extends JsonPayload, M extends Metadata, R extends
 	return {
 		// since we're also returning the 'rest', we need to cast to unknown first
 		metadata: ({ ...metadataOutput, ...metadataRest } as unknown) as MetadataOutput<R, M>,
-		data: ({ ...data, ...payloadRest } as unknown) as DataOutput<P>,
+		data: data as JsonPayload<D>,
 	};
 }

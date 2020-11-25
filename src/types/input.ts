@@ -14,8 +14,10 @@ export type ServiceContext = {
 	version?: string;
 };
 
+export type Data = Record<string, unknown>;
+
 // aka `data` when we send it through the client
-export type JsonPayload = {
+export type JsonPayload<D = Data> = {
 	/**
 	 * message is saved as textPayload if it is the only field remaining after the
 	 * Logging agent strips the other special-purpose fields and detect_json wasn't
@@ -27,7 +29,7 @@ export type JsonPayload = {
 	 * */
 	message?: string | Error;
 	serviceContext?: ServiceContext;
-} & Record<string, unknown>;
+} & D;
 
 export type Resource<R extends ResourceType> = {
 	// we mark this optional as we'll reset it by default when R is specified during entry creation
