@@ -3,7 +3,7 @@ import { EventId } from 'eventid';
 import type { Metadata, ResourceType, JsonPayload, Resource, Data } from './types/input';
 import { formatMessage, createFullyQualifiedIdentifier, formatHttpRequest } from './utils';
 import { SEVERITY } from './constants';
-import { DataOutput, MetadataOutput, MetadataOutputParameter } from './types/output';
+import { MetadataOutput, MetadataOutputParameter } from './types/output';
 import { DeepPartial } from 'utility-types';
 import { PreciseDate } from '@google-cloud/precise-date';
 
