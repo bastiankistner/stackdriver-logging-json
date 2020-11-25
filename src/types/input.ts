@@ -170,4 +170,6 @@ export type AllMetadata = DeepRequired<Omit<Metadata, 'timestamp' | 'httpRequest
 	resource: DeepRequired<Resource<ResourceType>>;
 };
 
+export type DefaultMetadata = Pick<Metadata, 'labels' | 'logName' | 'severity'>;
+
 export type NonNullableMetadata = O.NonNullable<Metadata, keyof Metadata, 'deep'>; // DeepNonNullable<Metadata>;
