@@ -3,8 +3,11 @@ import fetch from 'node-fetch';
 import { entryToFluentBit130 } from '../format';
 import { entry } from '../format/test/entry';
 
+// TODO: test error reporting (seems it does not work with fluent-bit)
+
 async function writeToClient() {
 	const { metadata, data } = entry;
+	data.message = `client - ${data.message}`;
 
 	console.log('new Entry');
 
@@ -21,8 +24,8 @@ async function writeToClient() {
 
 	try {
 		console.log(loggingClientEntry);
-		// const result = await logger.write(loggingClientEntry);
-		// console.log(result);
+		const result = await logger.write(loggingClientEntry);
+		console.log(result);
 	} catch (err) {
 		console.error(err);
 	}
@@ -36,6 +39,7 @@ async function writeToFluentBit() {
 
 	const body = entryToFluentBit130(entry);
 	body.httpRequest.requestMethod = 'POST';
+	body.message = `fluent - ${body.message}`;
 
 	const response = await fetch(url, {
 		method: 'POST',

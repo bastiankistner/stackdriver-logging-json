@@ -9,7 +9,26 @@
 - ✅ compliant with std output (e.g. for kubernetes)
 - ✅ includes formatter for fluent-bit 1.3.0
 
-// TODO provide a table with all keys based on cloud logging client that maps to names and types for std
+## Tracing
+
+- will work out of the box when used with compatible library (e.g. OpenCensus or OpenTelemetry [recommended])
+
+## Error Reporting
+
+see https://cloud.google.com/error-reporting/docs/formatting-error-messages#json_representation
+
+**Required**
+
+- `serviceContext.service`
+- `message` as `Error.message` and including `Error.stack` (will be extracted automatically if message is instance of `Error`)
+
+## resource
+
+When using Stackdriver Logging Client:
+Define manually if using Stackdriver Client and default `global` does not fit.
+
+When using collector agent:
+Will be set automatically.
 
 ## Entry comparison
 
