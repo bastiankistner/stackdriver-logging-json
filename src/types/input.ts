@@ -1,11 +1,9 @@
 import { O } from 'ts-toolbelt';
 import { DeepRequired } from 'utility-types';
-import { DEFAULT_RESOURCE_TYPE, SEVERITY } from '../constants';
+import { SEVERITY } from '../constants';
 import { ResourceMap } from '../__generated__/resources';
 
 export type Severity = keyof typeof SEVERITY;
-
-export type DefaultResourceType = typeof DEFAULT_RESOURCE_TYPE;
 
 export type ResourceType = keyof ResourceMap;
 
@@ -165,6 +163,7 @@ export type Metadata = {
 	httpRequest?: HttpRequest;
 };
 
+// we use this to create pseudo types with generics
 export type AllMetadata = DeepRequired<Omit<Metadata, 'timestamp' | 'httpRequest'>> & {
 	timestamp: Metadata['timestamp'];
 	httpRequest: DeepRequired<Metadata['httpRequest']>;

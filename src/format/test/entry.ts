@@ -47,9 +47,9 @@ export const entry = createEntry({
 		timestamp: new PreciseDate().toISOString(),
 		traceSampled: true,
 	},
+	message: new Error('hello'),
+	serviceContext: { service: 'my-service', version: '1.0.0' },
 	payload: {
-		message: new Error('hello'),
-		serviceContext: { service: 'my-service', version: '1.0.0' },
 		and: { some: 'more' },
 	},
 });
