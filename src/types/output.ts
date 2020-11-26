@@ -12,8 +12,7 @@ export type MetadataOutput<R extends ResourceType | undefined = undefined, M ext
 		: {}
 >;
 
-export type MetadataOutputParameter = MetadataOutput<ResourceType, AllMetadata> &
-	MetadataOutput<undefined, AllMetadata>;
+export type MetadataOutputParameter = MetadataOutput<any, AllMetadata>;
 
 export type DataOutput<P extends JsonPayload = {}> = Overwrite<
 	P,

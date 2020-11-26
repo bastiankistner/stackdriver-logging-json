@@ -9,7 +9,7 @@ import { PreciseDate } from '@google-cloud/precise-date';
 
 const eventId = new EventId();
 
-export function createEntry<M extends Metadata, R extends ResourceType | undefined = undefined, D = Data>({
+export function createEntry<M extends Metadata, R extends ResourceType, D = Data>({
 	projectId,
 	resource,
 	serviceContext,
@@ -73,7 +73,7 @@ export function createEntry<M extends Metadata, R extends ResourceType | undefin
 		metadataOutput.spanId = spanId;
 	}
 
-	if (resource && resource?.type !== undefined) {
+	if (typeof resource !== 'undefined' && resource.type !== undefined) {
 		metadataOutput.resource = resource;
 	}
 
