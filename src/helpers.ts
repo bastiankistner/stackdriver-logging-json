@@ -1,4 +1,4 @@
-import { Entry } from '@google-cloud/logging';
+import type { Entry } from '@google-cloud/logging';
 import { Duration, HttpRequest, Metadata, Resource, ResourceType, ServiceContext } from './types/input';
 import {
 	convertClientMetadataToStdMetadata,
@@ -10,6 +10,7 @@ import {
 import { EventId } from 'eventid';
 import { SEVERITY } from './constants';
 import { PreciseDate } from '@google-cloud/precise-date';
+import { LogEntry } from '@google-cloud/logging/build/src/entry';
 
 const eventId = new EventId();
 
@@ -80,13 +81,17 @@ function processMetadata(
 	return result;
 }
 
-export function toLoggingClient(projectId: string, input: Input, skipDefaults?: boolean): Entry {
+export function toLoggingClient(
+	projectId: string,
+	input: Input,
+	skipDefaults?: boolean
+): [metadata: Entry['metadata'], data: Entry['data']] {
 	const { metadata, resource, serviceContext, message, payload } = input;
 
-	return new Entry(
+	return [
 		{ ...processMetadata({ projectId, metadata, resource }, skipDefaults) }, // metadata
-		{ ...payload, message: formatMessage(message), serviceContext } // jsonPayload
-	);
+		{ ...payload, message: formatMessage(message), serviceContext }, // jsonPayload
+	];
 }
 
 export function toStd(projectId: string, input: Input, skipDefaults?: boolean) {
