@@ -29,12 +29,10 @@ export type JsonPayload<D = Data> = {
 	serviceContext?: ServiceContext;
 } & D;
 
-export type Resource<R extends ResourceType | undefined> = R extends ResourceType
-	? {
-			type: R;
-			labels: ResourceMap[R];
-	  }
-	: undefined;
+export type Resource<R extends ResourceType> = {
+	type: R;
+	labels: ResourceMap[R];
+};
 
 // duration e.g. `2.000000500s` (2s 500nanos)
 export type Duration = { seconds?: number; nanos?: number };

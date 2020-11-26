@@ -103,3 +103,9 @@ export function createEntry<M extends Metadata, R extends ResourceType, D = Data
 		data: data as JsonPayload<D>,
 	};
 }
+
+// this is a helper function that must be used for creating individual metadata
+// if we don't use it, the generics get screwed for httpRequest.latency
+export function createMetadata<M extends Metadata = Metadata>(metadata?: M) {
+	return metadata || {};
+}

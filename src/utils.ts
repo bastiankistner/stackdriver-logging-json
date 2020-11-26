@@ -30,7 +30,7 @@ export function convertErrorToMessage(error: Error) {
 	return `${error.message}${stackAppendix}`;
 }
 
-export function formatMessage(message: string | Error) {
+export function formatMessage(message: string | Error | undefined) {
 	if (message instanceof Error) {
 		return convertErrorToMessage(message);
 	}
@@ -43,7 +43,7 @@ export function validateProjectId(projectId: string) {
 
 export function createFullyQualifiedIdentifier(
 	type: 'traces' | 'logs',
-	id: string,
+	id: string | undefined,
 	projectId: string
 ): string | undefined {
 	if (typeof id !== 'string') {

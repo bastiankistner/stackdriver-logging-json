@@ -1,6 +1,6 @@
 {
 	"name": "stackdriver-logging-json",
-	"version": "2.3.3",
+	"version": "2.3.6",
 	"description": "Plain JSON entries for Stackdriver Logging to be used with Google's logging client or standard streams (e.g. winston, tslog, bunyan, pino). Examples, additional utils and a formatter for GCP managed k8s fluent-bit included.",
 	"main": "lib/index.js",
 	"repository": "git@github.com:passionkind/stackdriver-logging-json.git",
