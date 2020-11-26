@@ -3,7 +3,7 @@ import { Overwrite } from 'utility-types';
 import { Duration, Metadata, ResourceType, Resource, JsonPayload, AllMetadata } from './input';
 import { O } from 'ts-toolbelt';
 
-export type MetadataOutput<R extends ResourceType | undefined = undefined, M extends Metadata = Metadata> = Overwrite<
+export type MetadataOutput<R extends ResourceType | undefined = any, M extends Metadata = Metadata> = Overwrite<
 	Exclude<R extends ResourceType ? M & { resource: Resource<R> } : M, 'httpRequest'>,
 	M['httpRequest'] extends undefined
 		? {}
