@@ -10,7 +10,6 @@ import {
 import { EventId } from 'eventid';
 import { SEVERITY } from './constants';
 import { PreciseDate } from '@google-cloud/precise-date';
-import { LogEntry } from '@google-cloud/logging/build/src/entry';
 
 const eventId = new EventId();
 
